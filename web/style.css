@@ -1,0 +1,22 @@
+body{
+    background-color: slategray;
+    padding: 0;
+    margin:0;
+}
+
+section{
+    color:whitesmoke;
+    padding-left: 5vw;
+    padding-top:5vh;
+    font-size: 3rem;
+}
+
+#original::before{
+    content:"Original: ";
+    color:salmon;
+}
+
+#modified::before{
+    content: "Modified: ";
+    color:salmon;
+}

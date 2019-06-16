@@ -41,29 +41,37 @@ function valid(text) {
     return expression.test(text);
 }
 
-function getWords() {
-    fetch('https://raw.githubusercontent.com/words/an-array-of-spanish-words/master/palabras.json')
-        .then(function (res) {
-            return res.json()
-        })
-        .then(function (data) {
-
-            let aWord=getWord(data);
-            
-            while ( aWord.length< 8 || aWord.length>15) {
-                aWord=getWord(data);
-                console.log(aWord);
-            }
-            console.log(aWord);
-            aWord=getSymbol(aWord)
-            aWord=getNumber(aWord)
-            aWord=getMayus(aWord)
-            console.log(aWord);            
-
-        })
-        .catch((error) => {
-            console.log(error)
-        })
+async function getWords(url) {
+    try {
+        const response = await fetch(url);
+        let words=await response.json();
+        return words;
+    }
+    catch (err) {
+        console.log('fetch failed', err);
+    }
 }
 
-getWords();
+function working(word){
+    original= document.getElementById("original");
+    original.innerHTML= word;
+
+    word=getSymbol(word)
+    word=getNumber(word)
+    word=getMayus(word)
+
+    original= document.getElementById("modified");
+    original.innerHTML= word;    
+}
+
+
+getWords("https://raw.githubusercontent.com/words/an-array-of-spanish-words/master/palabras.json")
+    .then(words=>{
+        let aWord=getWord(words);
+        while (aWord.length< 8 || aWord.length>15) {
+            aWord=getWord(words);
+            console.log(aWord);
+        }
+        working(aWord);
+        console.log(aWord);
+    })
