@@ -16,7 +16,16 @@ section{
     color:salmon;
 }
 
-#modified::before{
+#modified-block::before{
     content: "Modified: ";
     color:salmon;
+}
+
+#modified{
+    font-size: 3rem;
+}
+
+#btnCopy{
+    font-size: 3rem;
+    color: rgb(124, 107, 107);
 }

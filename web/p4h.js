@@ -53,15 +53,15 @@ async function getWords(url) {
 }
 
 function working(word){
-    original= document.getElementById("original");
+    let original= document.getElementById("original");
     original.innerHTML= word;
 
     word=getSymbol(word)
     word=getNumber(word)
     word=getMayus(word)
 
-    original= document.getElementById("modified");
-    original.innerHTML= word;    
+    let modified= document.getElementById("modified");
+    modified.value= word;    
 }
 
 
@@ -74,4 +74,20 @@ getWords("https://raw.githubusercontent.com/words/an-array-of-spanish-words/mast
         }
         working(aWord);
         console.log(aWord);
-    })
+    });
+
+let btn = document.getElementById("btnCopy");
+btn.addEventListener('click', (ev)=>{
+    ev.preventDefault();
+    let modified= document.getElementById("modified");
+    modified.select();
+    modified.focus();
+    try{
+        let copy= document.execCommand('copy');
+    }
+    catch(err){
+        console.error(err)
+    }
+
+})
+
