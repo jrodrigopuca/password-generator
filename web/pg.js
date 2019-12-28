@@ -1,22 +1,37 @@
 function getWord(array) {
     let min = 0; let max = array.length - 1;
-    let random = Math.floor(Math.random() * (max - min)) + min;
-    return array[random]
+    random = 1;
+    try{
+        random = Math.floor(Math.random() * (max - min)) + min;
+    }
+    catch(e){
+        console.log("error en rand", e);
+    }
+    return array[random];
 }
 
 function change(text, aOriginal, aChanged) {
     let index = -1;
+    text= text.normalize('NFD').replace(/[\u0300-\u036f]/g,"")
+    let i=0;
 
     while (index < 0) {
+        i++;
         char = getWord(text)
-        console.log(char)
+        console.log(i+": "+char)
+        if (i>30){
+            char='a';
+            text+="."+char;
+        }
         index = aOriginal.indexOf(char)
     }
-
+    
     text = text.replace(char, aChanged[index]);
+
     return text;
 }
 
+// ----- Transformar letra 
 function getNumber(text) {
     let original = ["a", "b", "e", "i", "g", "o", "q", "s", "t", "z"];
     let numbers = [4, 8, 3, 1, 6, 0, 9, 5, 7, 2];
@@ -24,8 +39,8 @@ function getNumber(text) {
 }
 
 function getSymbol(text) {
-    let original = ["a", "c", "d", "i", "l", "o", "p", "s", "y"];
-    let symbols = ["@", "(", ")", "!", "/", "*", "?", "$", "&"];
+    let original = ["a","c", "d", "i", "l", "o", "p", "s", "y","q"];
+    let symbols = ["@", "(", ")", "!", "/", "*", "?", "$", "&","¿"];
     return change(text, original, symbols);
 }
 
@@ -55,16 +70,11 @@ async function getWords(url) {
 function working(word){
     let original= document.getElementById("original");
     original.innerHTML= word;
+        
+    word=getSymbol(word)
+    word=getNumber(word)
+    word=getMayus(word)
 
-    try{
-        word=getSymbol(word)
-        word=getNumber(word)
-        word=getMayus(word)
-    }
-    catch(err){
-        console.log('error');
-        word='error';
-    }
 
     let modified= document.getElementById("modified");
     modified.value= word;    
@@ -76,12 +86,17 @@ function start(){
             let aWord=getWord(words);
             while (aWord.length< 8 || aWord.length>15) {
                 aWord=getWord(words);
-                console.log(aWord);
-            }
+                //console.log(aWord);
+            }/*
+            try{ working(aWord);}
+            catch(e){ console.log(e)}
+            */
             working(aWord);
             console.log(aWord);
         });
     }
+
+
 start();
 
 let btnCopy = document.getElementById("btnCopy")
