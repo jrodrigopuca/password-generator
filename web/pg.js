@@ -56,38 +56,52 @@ function working(word){
     let original= document.getElementById("original");
     original.innerHTML= word;
 
-    word=getSymbol(word)
-    word=getNumber(word)
-    word=getMayus(word)
+    try{
+        word=getSymbol(word)
+        word=getNumber(word)
+        word=getMayus(word)
+    }
+    catch(err){
+        console.log('error');
+        word='error';
+    }
 
     let modified= document.getElementById("modified");
     modified.value= word;    
 }
 
-
-getWords("https://raw.githubusercontent.com/words/an-array-of-spanish-words/master/palabras.json")
-    .then(words=>{
-        let aWord=getWord(words);
-        while (aWord.length< 8 || aWord.length>15) {
-            aWord=getWord(words);
+function start(){
+    getWords("https://raw.githubusercontent.com/words/an-array-of-spanish-words/master/palabras.json")
+        .then(words=>{
+            let aWord=getWord(words);
+            while (aWord.length< 8 || aWord.length>15) {
+                aWord=getWord(words);
+                console.log(aWord);
+            }
+            working(aWord);
             console.log(aWord);
+        });
+    }
+start();
+
+let btnCopy = document.getElementById("btnCopy")
+    .addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        let modified= document.getElementById("modified");
+        modified.select();
+        modified.focus();
+        try{
+            let copy= document.execCommand('copy');
         }
-        working(aWord);
-        console.log(aWord);
+        catch(err){
+            console.error(err)
+        }
+
     });
 
-let btn = document.getElementById("btnCopy");
-btn.addEventListener('click', (ev)=>{
-    ev.preventDefault();
-    let modified= document.getElementById("modified");
-    modified.select();
-    modified.focus();
-    try{
-        let copy= document.execCommand('copy');
-    }
-    catch(err){
-        console.error(err)
-    }
-
-})
+let btnRestart = document.getElementById('btnRestart')
+    .addEventListener('click',(ev)=>{
+        ev.preventDefault();
+        start();
+    });
 

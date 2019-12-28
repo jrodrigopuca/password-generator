@@ -17,7 +17,7 @@ section{
 }
 
 #modified-block::before{
-    content: "Modified: ";
+    content: "Modificado: ";
     color:salmon;
 }
 
@@ -25,7 +25,8 @@ section{
     font-size: 3rem;
 }
 
-#btnCopy{
+.btn{
     font-size: 3rem;
-    color: rgb(124, 107, 107);
+    background-color: rgb(124, 107, 107);
+    color:whitesmoke;
 }
