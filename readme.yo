@@ -1,0 +1,31 @@
+Publicar extensión:
+https://developer.mozilla.org/es/docs/Mozilla/Add-ons/WebExtensions/Publishing_your_WebExtension
+
+Para registrar extensión:
+https://addons.mozilla.org/en-US/firefox/
+
+Tu primera extensión:
+https://developer.mozilla.org/es/docs/Mozilla/Add-ons/WebExtensions/Tu_primera_WebExtension
+
+Tu primera extensión (en github)
+https://github.com/mdn/webextensions-examples/blob/master/borderify/manifest.json
+
+
+Match pattern in extensions 
+https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns
+
+Cross browser extension 
+https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Build_a_cross_browser_extension
+
+Video sobre el xBrowser extension
+https://www.youtube.com/watch?v=RJtjp-Vtwjs
+
+Ejemplo base:
+https://www.youtube.com/watch?v=Q3AQ5D2QFwc
+
+
+    "content_scripts":[{
+        "matches":["all_urls"],
+        "js": ["content.js"]
+        }
+    ],
