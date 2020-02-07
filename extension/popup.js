@@ -1,3 +1,5 @@
+console.log(PG.generate());
+
 i=0;
 
 let btn = document.getElementById('btnRefresh');
