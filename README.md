@@ -24,6 +24,9 @@ This tool transforms a simple word to password. It's useful to remember. For exa
 - package.json
 - webpack.config.js
 
+## ExtensionEdge folder:
+Same that extension folder but with special manifest.json and images. This is necessary to publish on MS Edge.
+
 -------------------------
 
 ## Instruction to generate 'generator.js' with library folder.
