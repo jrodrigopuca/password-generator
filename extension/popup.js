@@ -1,16 +1,27 @@
-console.log(PG.generate());
+let btnRefresh = document.getElementById('btnRefresh');
+let btnCopy = document.getElementById('btnCopy');
+let lblResult = document.getElementById('lblResult');
+let lblOriginal = document.getElementById('lblOriginal');
 
-i=0;
-
-let btn = document.getElementById('btnRefresh');
-let lbl = document.getElementById('lblResult');
-
-btn.addEventListener('click', e => changeValue());
+btnRefresh.addEventListener('click', e => changeValue());
+btnCopy.addEventListener('click', e=>justCopy());
 
 async function changeValue() {
-    i=i+1;
-    lbl.innerHTML = i+ "Valor:" + Math.random();
+    let pass= new Generator();
+    let p=pass.getPass();
+    lblResult.value =  p.pass;
+    lblOriginal.innerHTML = p.original;
+}
 
+async function justCopy(){
+    lblResult.select();
+        lblResult.focus();
+        try{
+            let copy= document.execCommand('copy');
+        }
+        catch(err){
+            console.error(err)
+        }
 }
 
 async function init() {
