@@ -1,22 +1,18 @@
-import wordsEN from './wordsEN.json'; 
+const wordsEN = require('./wordsEN.json'); 
+const wordsES = require('./wordsES.json'); 
 
-class Generator {
+export default class Generator {
     constructor(lang="EN"){
         this.lang= lang==="ES"?"ES":"EN";
-        this.loadData(this.lang);
-    }
-
-    loadData(lang){
-        this.dictionary=lang==='ES'?wordsES:wordsEN;
     }
 
     getPass(){
-        let words= this.dictionary;
+        let words= this.lang==='ES'?wordsES:wordsEN;
         let word =""; let newWord="";
     
         while (word.length<8 || word.length>15){
             word=this.getWord(words);
-            console.log(word);
+            //console.log(word);
         }
         
         newWord=this.getMayus(this.getNumber(this.getSymbol(word)));
@@ -32,7 +28,7 @@ class Generator {
         while (index < 0) {
             i++;
             char = this.getWord(text)
-            console.log(i+": "+char)
+            //console.log(i+": "+char)
             if (i>30){
                 // parche por si quiere pasar 30 veces
                 char='a';
@@ -73,8 +69,6 @@ class Generator {
     }
 
 }
-
-export default Generator;
 
 
 

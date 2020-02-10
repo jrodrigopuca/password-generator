@@ -7,7 +7,7 @@ module.exports = {
         rules: [
             {
                 test: /(\\.jsx|\\.js)$/,
-                exclude: [/node_modules/, /v1/],
+                exclude: /node_modules/,
                 use: {
                     loader: "babel-loader"
                 }
@@ -26,18 +26,38 @@ module.exports = {
             filename: "./index.html"
         })
     ],
-    entry: './src/index.js',
+    entry:{
+        generator:'./src/generator.js'
+    },
+
     output: {
-        filename: 'generator.js',
-        chunkFilename: '[name].js',
+        filename: 'generator.bundle.js',
+        chunkFilename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
         libraryTarget:'var',
-        library:'Generator'
+        library:'PG'
     },
+    externals: [
+        /an-array-of-*-words/,
+    ],
     optimization:{
-        splitChunks:{chunks:'all'} 
+        splitChunks:{chunks:'all'}, 
+        
     }
 }
+/*
 
+    entry:{
+        index:'./src/index.js',
+        generator:'./src/generator.js'
+    },
+
+    output: {
+        filename: '[name].bundle.js',
+        chunkFilename: '[name].bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+    },
+
+*/
 
 

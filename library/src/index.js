@@ -1,5 +1,5 @@
-import Generator from './generator';
-let G1 = new Generator();
-console.log("hello");
-console.log(G1.getPass());
+const Generator = require('./generator').default;
+//let G1 = new Generator("ES");
+//console.log(G1.getPass());
 
+module.exports=Generator;
