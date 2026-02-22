@@ -15,8 +15,8 @@ const ROOT = resolve(__dirname, "..");
 const ICONS_DIR = resolve(ROOT, "packages/extension/icons");
 const PUBLIC_ICONS_DIR = resolve(ROOT, "packages/extension/public/icons");
 
-// Sizes needed for browser extension manifest v3
-const SIZES = [16, 48, 128];
+// Sizes needed for browser extension manifest v3 + store publishing
+const SIZES = [16, 48, 64, 128];
 
 // The main SVG — used for 48px and 128px
 const mainSvg = readFileSync(resolve(ICONS_DIR, "icon.svg"), "utf-8");
