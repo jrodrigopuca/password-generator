@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Main gradient: deep purple to violet -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9c5fff"/>
+      <stop offset="50%" stop-color="#7c4dff"/>
+      <stop offset="100%" stop-color="#512da8"/>
+    </linearGradient>
+    <!-- Inner shadow/depth -->
+    <radialGradient id="glow" cx="35%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Key fill gradient -->
+    <linearGradient id="keyFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8daf7"/>
+    </linearGradient>
+    <!-- Sparkle gold -->
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe082"/>
+      <stop offset="100%" stop-color="#ffb300"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="6" y="6" width="116" height="116" rx="26" ry="26" fill="url(#bg)"/>
+  <!-- Glow overlay for depth -->
+  <rect x="6" y="6" width="116" height="116" rx="26" ry="26" fill="url(#glow)"/>
+  <!-- Subtle border -->
+  <rect x="6" y="6" width="116" height="116" rx="26" ry="26" fill="none" stroke="#fff" stroke-opacity="0.1" stroke-width="1"/>
+
+  <!-- Key icon — bold, centered, scales well to 16px -->
+  <g transform="translate(64, 62)">
+    <!-- Key head ring (outer) -->
+    <circle cx="-14" cy="0" r="20" fill="none" stroke="url(#keyFill)" stroke-width="7"/>
+    <!-- Key head ring (inner hole) -->
+    <circle cx="-14" cy="0" r="8" fill="url(#bg)"/>
+    <circle cx="-14" cy="0" r="8" fill="none" stroke="url(#keyFill)" stroke-width="2.5"/>
+
+    <!-- Key shaft -->
+    <rect x="6" y="-3.5" width="32" height="7" rx="3.5" fill="url(#keyFill)"/>
+
+    <!-- Key teeth -->
+    <rect x="24" y="-3.5" width="5.5" height="14" rx="2.5" fill="url(#keyFill)"/>
+    <rect x="33" y="-3.5" width="5.5" height="17" rx="2.5" fill="url(#keyFill)"/>
+  </g>
+
+  <!-- Sparkle stars — "memorable" / magic feel -->
+  <!-- Large sparkle top-right -->
+  <path d="M97,26 L99,32 L105,34 L99,36 L97,42 L95,36 L89,34 L95,32 Z" fill="url(#gold)"/>
+  <!-- Medium sparkle -->
+  <path d="M82,42 L83.5,46 L87.5,47.5 L83.5,49 L82,53 L80.5,49 L76.5,47.5 L80.5,46 Z" fill="url(#gold)" opacity="0.75"/>
+  <!-- Small sparkle -->
+  <path d="M103,46 L104,48.5 L106.5,49.5 L104,50.5 L103,53 L102,50.5 L99.5,49.5 L102,48.5 Z" fill="url(#gold)" opacity="0.55"/>
+</svg>

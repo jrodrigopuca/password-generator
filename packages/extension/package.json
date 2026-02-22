@@ -1,0 +1,19 @@
+{
+  "name": "@memorable-passwords/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Memorable Passwords — browser extension",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@memorable-passwords/core": "workspace:*"
+  },
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "vite-plugin-web-extension": "^4.5.0"
+  }
+}

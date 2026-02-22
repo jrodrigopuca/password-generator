@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memorable Passwords</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img class="logo" src="../../icons/icon-48.png" alt="" width="22" height="22">
+      <h1>Memorable Passwords</h1>
+    </header>
+
+    <main>
+      <section class="result">
+        <label class="original" id="original"></label>
+        <div class="password-row">
+          <input id="password" type="text" readonly placeholder="Click Generate…" />
+          <button id="btn-copy" class="btn-icon" title="Copy to clipboard">📋</button>
+        </div>
+        <div class="strength-section">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <div class="strength-label">
+            <span id="strength-text"></span>
+            <span class="entropy" id="strength-entropy"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls">
+        <button id="btn-generate" class="btn-primary">Generate</button>
+      </section>
+
+      <section class="options">
+        <label>
+          Mode
+          <select id="opt-mode">
+            <option value="word">Word</option>
+            <option value="passphrase">Passphrase</option>
+            <option value="random">Random</option>
+          </select>
+        </label>
+        <label>
+          Language
+          <select id="opt-language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </label>
+      </section>
+    </main>
+
+    <footer>
+      <a href="https://github.com/nicobytes/password-generator" target="_blank" rel="noopener">Memorable Passwords v2.0</a>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+</html>

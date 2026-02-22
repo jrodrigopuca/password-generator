@@ -1,6 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Legacy
 *_test.js
 others
-node_modules
 extension/popup.zip
 extensionEdge/popup.zip
 instructions.zip
