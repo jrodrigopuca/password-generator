@@ -1,11 +1,16 @@
-import { generate } from "@memorable-passwords/core";
+import "../packages/extension/src/popup/popup.css";
+import { generate } from "../packages/core/src/index";
 import type {
 	GeneratedPassword,
 	GenerationMode,
 	Language,
-} from "@memorable-passwords/core";
-import { applyI18n, strengthLabel, t } from "./i18n";
-import type { UILanguage } from "./i18n";
+} from "../packages/core/src/types";
+import {
+	applyI18n,
+	strengthLabel,
+	t,
+} from "../packages/extension/src/popup/i18n";
+import type { UILanguage } from "../packages/extension/src/popup/i18n";
 
 // ---------------------------------------------------------------------------
 // DOM elements
@@ -41,25 +46,25 @@ const historyCount = $<HTMLElement>("history-count");
 const toast = $<HTMLElement>("toast");
 
 // ---------------------------------------------------------------------------
-// Session history (not persisted)
+// Session history
 // ---------------------------------------------------------------------------
 const MAX_HISTORY = 25;
-const history: { password: string; mode: string; time: number }[] = [];
+const sessionHistory: { password: string; mode: string; time: number }[] = [];
 
 function pushHistory(result: GeneratedPassword): void {
-	history.unshift({
+	sessionHistory.unshift({
 		password: result.password,
 		mode: result.mode,
 		time: Date.now(),
 	});
-	if (history.length > MAX_HISTORY) history.pop();
+	if (sessionHistory.length > MAX_HISTORY) sessionHistory.pop();
 	renderHistory();
 }
 
 function renderHistory(): void {
-	historyCount.textContent = String(history.length);
+	historyCount.textContent = String(sessionHistory.length);
 	historyList.innerHTML = "";
-	for (const entry of history) {
+	for (const entry of sessionHistory) {
 		const li = document.createElement("li");
 		li.className = "history-item";
 
@@ -135,6 +140,10 @@ function generatePassword(): void {
 	strengthText.textContent = strengthLabel(result.strength);
 	strengthEntropy.textContent = `${result.entropy} bits`;
 
+	// Animate the button briefly
+	btnGenerate.style.transform = "scale(0.97)";
+	setTimeout(() => (btnGenerate.style.transform = ""), 120);
+
 	pushHistory(result);
 }
 
@@ -146,7 +155,6 @@ async function copyToClipboard(text: string): Promise<void> {
 		await navigator.clipboard.writeText(text);
 		showToast(t("copied"));
 	} catch {
-		// Fallback
 		const ta = document.createElement("textarea");
 		ta.value = text;
 		ta.style.position = "fixed";
@@ -171,7 +179,7 @@ async function copyPassword(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Preferences (persist across sessions)
+// Preferences (localStorage for demo)
 // ---------------------------------------------------------------------------
 interface Preferences {
 	mode: string;
@@ -207,25 +215,15 @@ function applyPreferences(p: Partial<Preferences>): void {
 }
 
 function savePreferences(): void {
-	const prefs = gatherPreferences();
-	if (typeof chrome !== "undefined" && chrome.storage?.local) {
-		chrome.storage.local.set({ preferences: prefs });
-	} else {
-		localStorage.setItem("mp-preferences", JSON.stringify(prefs));
-	}
+	localStorage.setItem("mp-preferences", JSON.stringify(gatherPreferences()));
 }
 
-async function loadPreferences(): Promise<void> {
+function loadPreferences(): void {
 	try {
-		if (typeof chrome !== "undefined" && chrome.storage?.local) {
-			const data = await chrome.storage.local.get("preferences");
-			if (data.preferences) applyPreferences(data.preferences);
-		} else {
-			const stored = localStorage.getItem("mp-preferences");
-			if (stored) applyPreferences(JSON.parse(stored));
-		}
+		const stored = localStorage.getItem("mp-preferences");
+		if (stored) applyPreferences(JSON.parse(stored));
 	} catch {
-		// Use defaults
+		/* defaults */
 	}
 }
 
@@ -250,7 +248,6 @@ optLanguage.addEventListener("change", () => {
 	savePreferences();
 });
 
-// Advanced inputs — regenerate on change
 for (const el of [optSymbols, optNumbers, optUppercase, optWordcount]) {
 	el.addEventListener("change", () => {
 		generatePassword();
@@ -262,7 +259,6 @@ optAmbiguous.addEventListener("change", () => {
 	savePreferences();
 });
 
-// Collapsible toggles
 advancedToggle.addEventListener("click", () =>
 	togglePanel(advancedToggle, advancedPanel),
 );
@@ -270,7 +266,6 @@ historyToggle.addEventListener("click", () =>
 	togglePanel(historyToggle, historyList),
 );
 
-// Keyboard shortcut: Enter to generate
 document.addEventListener("keydown", (e) => {
 	if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
 		e.preventDefault();
@@ -282,7 +277,6 @@ document.addEventListener("keydown", (e) => {
 // ---------------------------------------------------------------------------
 // Initialize
 // ---------------------------------------------------------------------------
-loadPreferences().then(() => {
-	applyI18n(optLanguage.value as UILanguage);
-	generatePassword();
-});
+loadPreferences();
+applyI18n(optLanguage.value as UILanguage);
+generatePassword();

@@ -8,9 +8,10 @@
     "build:extension": "pnpm --filter @memorable-passwords/extension build",
     "dev": "pnpm --filter @memorable-passwords/extension dev",
     "dev:core": "pnpm --filter @memorable-passwords/core dev",
+    "demo": "vite --config vite.demo.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit",
+    "lint": "tsc -b --force",
     "icons": "node scripts/generate-icons.mjs"
   },
   "engines": {

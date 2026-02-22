@@ -4,12 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memorable Passwords</title>
-  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container" role="main" aria-label="Password Generator">
     <header>
-      <img class="logo" src="../../icons/icon-48.png" alt="" width="22" height="22">
+      <svg class="logo" width="22" height="22" viewBox="0 0 128 128">
+        <defs>
+          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9c5fff"/>
+            <stop offset="50%" stop-color="#7c4dff"/>
+            <stop offset="100%" stop-color="#512da8"/>
+          </linearGradient>
+          <radialGradient id="glow" cx="35%" cy="30%" r="60%">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="keyFill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#e8daf7"/>
+          </linearGradient>
+          <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffe082"/>
+            <stop offset="100%" stop-color="#ffb300"/>
+          </linearGradient>
+        </defs>
+        <rect x="6" y="6" width="116" height="116" rx="26" ry="26" fill="url(#bg)"/>
+        <rect x="6" y="6" width="116" height="116" rx="26" ry="26" fill="url(#glow)"/>
+        <rect x="6" y="6" width="116" height="116" rx="26" ry="26" fill="none" stroke="#fff" stroke-opacity="0.1" stroke-width="1"/>
+        <g transform="translate(64, 62)">
+          <circle cx="-14" cy="0" r="20" fill="none" stroke="url(#keyFill)" stroke-width="7"/>
+          <circle cx="-14" cy="0" r="8" fill="url(#bg)"/>
+          <circle cx="-14" cy="0" r="8" fill="none" stroke="url(#keyFill)" stroke-width="2.5"/>
+          <rect x="6" y="-3.5" width="32" height="7" rx="3.5" fill="url(#keyFill)"/>
+          <rect x="24" y="-3.5" width="5.5" height="14" rx="2.5" fill="url(#keyFill)"/>
+          <rect x="33" y="-3.5" width="5.5" height="17" rx="2.5" fill="url(#keyFill)"/>
+        </g>
+        <path d="M97,26 L99,32 L105,34 L99,36 L97,42 L95,36 L89,34 L95,32 Z" fill="url(#gold)"/>
+        <path d="M82,42 L83.5,46 L87.5,47.5 L83.5,49 L82,53 L80.5,49 L76.5,47.5 L80.5,46 Z" fill="url(#gold)" opacity="0.75"/>
+        <path d="M103,46 L104,48.5 L106.5,49.5 L104,50.5 L103,53 L102,50.5 L99.5,49.5 L102,48.5 Z" fill="url(#gold)" opacity="0.55"/>
+      </svg>
       <h1 data-i18n="title">Memorable Passwords</h1>
     </header>
 
@@ -94,6 +127,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="popup.ts"></script>
+  <script type="module" src="./demo.ts"></script>
 </body>
 </html>

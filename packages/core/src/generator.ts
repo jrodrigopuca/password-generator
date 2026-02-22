@@ -3,18 +3,18 @@
  * Supports three modes: word transform, passphrase, and random.
  */
 
-import { wordsEn } from "./dictionaries/en.js";
-import { wordsEs } from "./dictionaries/es.js";
-import { randomElement, randomInt } from "./random.js";
-import { estimateEntropy, getStrengthLevel } from "./strength.js";
+import { wordsEn } from "./dictionaries/en";
+import { wordsEs } from "./dictionaries/es";
+import { randomElement, randomInt } from "./random";
+import { estimateEntropy, getStrengthLevel } from "./strength";
 import {
 	removeDiacritics,
 	applySymbols,
 	applyNumbers,
 	applyUppercase,
-} from "./transforms.js";
-import type { GeneratorOptions, GeneratedPassword, Language } from "./types.js";
-import { DEFAULT_OPTIONS } from "./types.js";
+} from "./transforms";
+import type { GeneratorOptions, GeneratedPassword, Language } from "./types";
+import { DEFAULT_OPTIONS } from "./types";
 
 /** Character sets for random mode */
 const CHARS = {

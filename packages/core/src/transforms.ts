@@ -3,7 +3,7 @@
  * Each transform replaces one character in the input text.
  */
 
-import { randomInt } from "./random.js";
+import { randomInt } from "./random";
 
 /** Map of lowercase letters to symbol replacements */
 const SYMBOL_MAP: Record<string, string> = {

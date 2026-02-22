@@ -2,7 +2,7 @@
  * Password strength estimation based on entropy.
  */
 
-import type { StrengthLevel } from "./types.js";
+import type { StrengthLevel } from "./types";
 
 /**
  * Estimate the entropy of a password in bits.
