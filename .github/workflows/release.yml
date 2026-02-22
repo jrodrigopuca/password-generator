@@ -49,33 +49,42 @@ jobs:
         id: version
         run: echo "version=$(jq -r .version packages/extension/manifest.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Package — Chrome / Edge
+      - name: Prepare clean build
+        working-directory: packages/extension/dist
+        run: |
+          # Remove declaration files, source maps, and Vite artifacts
+          find . -name '*.d.ts' -o -name '*.d.ts.map' -o -name '*.js.map' -o -name 'virtual:*' | xargs rm -f
+          # Remove top-level JS duplicates (the extension uses files under src/)
+          rm -f background.js
+          rm -rf popup/
+
+      - name: Prepare Chrome / Edge artifact
         if: inputs.browser == 'all' || inputs.browser == 'chrome'
         working-directory: packages/extension/dist
         run: |
-          # Remove Firefox-only field for Chrome/Edge build
-          jq 'del(.browser_specific_settings)' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
-          zip -r ../../../memorable-passwords-chrome-v${{ steps.version.outputs.version }}.zip .
+          mkdir -p ../../chrome-build
+          cp -r . ../../chrome-build/
+          # Remove Firefox-only field
+          jq 'del(.browser_specific_settings)' ../../chrome-build/manifest.json > ../../chrome-build/manifest.tmp
+          mv ../../chrome-build/manifest.tmp ../../chrome-build/manifest.json
 
-      - name: Package — Firefox
+      - name: Prepare Firefox artifact
         if: inputs.browser == 'all' || inputs.browser == 'firefox'
         working-directory: packages/extension/dist
         run: |
-          # Restore original manifest (with gecko settings) if Chrome stripped it
-          git checkout -- ../manifest.json 2>/dev/null || true
-          pnpm --filter @memorable-passwords/extension build
-          zip -r ../../../memorable-passwords-firefox-v${{ steps.version.outputs.version }}.zip .
+          mkdir -p ../../firefox-build
+          cp -r . ../../firefox-build/
 
       - name: Upload Chrome / Edge artifact
         if: inputs.browser == 'all' || inputs.browser == 'chrome'
         uses: actions/upload-artifact@v4
         with:
           name: memorable-passwords-chrome-v${{ steps.version.outputs.version }}
-          path: memorable-passwords-chrome-v${{ steps.version.outputs.version }}.zip
+          path: packages/chrome-build/
 
       - name: Upload Firefox artifact
         if: inputs.browser == 'all' || inputs.browser == 'firefox'
         uses: actions/upload-artifact@v4
         with:
           name: memorable-passwords-firefox-v${{ steps.version.outputs.version }}
-          path: memorable-passwords-firefox-v${{ steps.version.outputs.version }}.zip
+          path: packages/firefox-build/
