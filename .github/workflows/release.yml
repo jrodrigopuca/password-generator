@@ -1,0 +1,81 @@
+name: Build Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: Target browser
+        required: true
+        type: choice
+        options:
+          - all
+          - chrome
+          - firefox
+        default: all
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm lint
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build extension
+        run: pnpm build:extension
+
+      - name: Read version
+        id: version
+        run: echo "version=$(jq -r .version packages/extension/manifest.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Package — Chrome / Edge
+        if: inputs.browser == 'all' || inputs.browser == 'chrome'
+        working-directory: packages/extension/dist
+        run: |
+          # Remove Firefox-only field for Chrome/Edge build
+          jq 'del(.browser_specific_settings)' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+          zip -r ../../../memorable-passwords-chrome-v${{ steps.version.outputs.version }}.zip .
+
+      - name: Package — Firefox
+        if: inputs.browser == 'all' || inputs.browser == 'firefox'
+        working-directory: packages/extension/dist
+        run: |
+          # Restore original manifest (with gecko settings) if Chrome stripped it
+          git checkout -- ../manifest.json 2>/dev/null || true
+          pnpm --filter @memorable-passwords/extension build
+          zip -r ../../../memorable-passwords-firefox-v${{ steps.version.outputs.version }}.zip .
+
+      - name: Upload Chrome / Edge artifact
+        if: inputs.browser == 'all' || inputs.browser == 'chrome'
+        uses: actions/upload-artifact@v4
+        with:
+          name: memorable-passwords-chrome-v${{ steps.version.outputs.version }}
+          path: memorable-passwords-chrome-v${{ steps.version.outputs.version }}.zip
+
+      - name: Upload Firefox artifact
+        if: inputs.browser == 'all' || inputs.browser == 'firefox'
+        uses: actions/upload-artifact@v4
+        with:
+          name: memorable-passwords-firefox-v${{ steps.version.outputs.version }}
+          path: memorable-passwords-firefox-v${{ steps.version.outputs.version }}.zip
