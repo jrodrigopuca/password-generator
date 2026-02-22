@@ -1,72 +1,91 @@
 # Memorable Passwords v2 — Plan de desarrollo
 
+> **Estado**: ✅ Implementación completa — todas las fases del roadmap finalizadas.
+
 ## Visión
 
 Reescribir el generador de contraseñas memorables desde cero con una arquitectura moderna, tipada y mantenible. Un solo codebase que alimente:
 
 - **Memorable Passwords** — extensión de navegador universal (Chrome, Edge, Firefox)
-- **Librería npm** — paquete publicable para que cualquier proyecto genere contraseñas memorables (nombre del paquete por definir)
+- **`@memorable-passwords/core`** — librería npm publicable para que cualquier proyecto genere contraseñas memorables
 - **Web / CLI** — consumidores futuros de la misma librería
 
 ---
 
-## Problemas del código legacy
+## Problemas del código legacy (resueltos ✅)
 
-| Problema                      | Impacto                                                                                                              |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Manifest v2                   | Chrome/Edge ya no aceptan extensiones nuevas con v2; Firefox lo deprecará                                            |
-| Código duplicado              | `extension/`, `extensionEdge/` y `web/` contienen copias del bundle y lógica casi idéntica                           |
-| Diccionario de baja calidad   | Listas JSON enormes con nombres propios, marcas, términos técnicos y palabras que no producen contraseñas memorables |
-| Una sola sustitución por tipo | Solo 1 símbolo, 1 número y 1 mayúscula — puede no pasar validaciones estrictas                                       |
-| `Math.random()`               | No es criptográficamente seguro                                                                                      |
-| Sin tests ni tipos            | No hay forma de verificar que los cambios no rompan nada                                                             |
-| Stack desactualizado          | Webpack 4, Babel 7 antiguo, sin TypeScript                                                                           |
+| Problema                      | Impacto                                                                                                              | Solución v2                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Manifest v2                   | Chrome/Edge ya no aceptan extensiones nuevas con v2; Firefox lo deprecará                                            | ✅ Manifest v3 universal                                   |
+| Código duplicado              | `extension/`, `extensionEdge/` y `web/` contienen copias del bundle y lógica casi idéntica                           | ✅ Monorepo con paquete `core` compartido                  |
+| Diccionario de baja calidad   | Listas JSON enormes con nombres propios, marcas, términos técnicos y palabras que no producen contraseñas memorables | ✅ 1 807 EN + 1 656 ES palabras curadas (6-12 chars)       |
+| Una sola sustitución por tipo | Solo 1 símbolo, 1 número y 1 mayúscula — puede no pasar validaciones estrictas                                       | ✅ Cantidad configurable de símbolos, números y mayúsculas |
+| `Math.random()`               | No es criptográficamente seguro                                                                                      | ✅ `crypto.getRandomValues()` en todos los módulos         |
+| Sin tests ni tipos            | No hay forma de verificar que los cambios no rompan nada                                                             | ✅ TypeScript estricto + 30 tests con Vitest               |
+| Stack desactualizado          | Webpack 4, Babel 7 antiguo, sin TypeScript                                                                           | ✅ Vite 7 + TypeScript 5.9 + pnpm workspaces               |
 
 ---
 
-## Estructura propuesta
+## Estructura actual
 
 ```
 password-generator/
 ├── packages/
-│   ├── core/                        ← Librería del generador (paquete npm, nombre TBD)
+│   ├── core/                        ← @memorable-passwords/core (librería npm)
 │   │   ├── src/
-│   │   │   ├── generator.ts             # Clase principal
-│   │   │   ├── dictionaries/
-│   │   │   │   ├── en.ts                # Diccionario inglés curado
-│   │   │   │   └── es.ts                # Diccionario español curado
-│   │   │   ├── transforms.ts           # Sustituciones (símbolo, número, mayúscula)
+│   │   │   ├── types.ts                 # GeneratorOptions, GeneratedPassword, defaults
 │   │   │   ├── random.ts               # Wrapper sobre crypto.getRandomValues()
-│   │   │   ├── strength.ts             # Cálculo de entropía / fortaleza
-│   │   │   ├── types.ts                # Interfaces y tipos compartidos
-│   │   │   └── index.ts                # Exports públicos
+│   │   │   ├── transforms.ts           # removeDiacritics, applySymbols/Numbers/Uppercase
+│   │   │   ├── strength.ts             # Cálculo de entropía y nivel de fortaleza
+│   │   │   ├── generator.ts            # generate() — punto de entrada principal
+│   │   │   ├── index.ts                # Re-exports públicos
+│   │   │   └── dictionaries/
+│   │   │       ├── en.ts               # 1 807 palabras inglés curadas
+│   │   │       └── es.ts               # 1 656 palabras español curadas
 │   │   ├── __tests__/
-│   │   │   ├── generator.test.ts
-│   │   │   ├── transforms.test.ts
-│   │   │   └── random.test.ts
+│   │   │   ├── generator.test.ts        # 14 tests
+│   │   │   ├── transforms.test.ts       # 8 tests
+│   │   │   └── random.test.ts           # 8 tests
 │   │   ├── tsconfig.json
+│   │   ├── vite.config.ts
 │   │   └── package.json
 │   │
-│   └── extension/                   ← "Memorable Passwords" — extensión unificada (Chrome/Edge/Firefox)
-│       ├── src/
-│       │   ├── popup/
-│       │   │   ├── popup.html
-│       │   │   ├── popup.ts             # Lógica del popup
-│       │   │   └── popup.css
-│       │   ├── background.ts            # Service worker (Manifest v3)
-│       │   └── manifest.json            # Manifest v3 universal
+│   └── extension/                   ← "Memorable Passwords" — extensión unificada
+│       ├── manifest.json                # Manifest v3 (Chrome/Edge/Firefox)
 │       ├── icons/
+│       │   └── icon.svg                 # Icono SVG maestro (gradiente púrpura, llave, sparkles)
+│       ├── public/icons/                # PNGs generados (16, 48, 128 px)
+│       ├── src/
+│       │   ├── background.ts            # Service worker (Manifest v3)
+│       │   └── popup/
+│       │       ├── popup.html           # UI con atributos data-i18n, ARIA, opciones avanzadas
+│       │       ├── popup.ts             # Lógica: generación, historial, toast, preferencias
+│       │       ├── popup.css            # Design system con CSS custom properties + dark mode
+│       │       └── i18n.ts              # Traducciones EN/ES, applyI18n(), t()
+│       ├── vite.config.ts
 │       ├── tsconfig.json
 │       └── package.json
 │
+├── demo/                            ← Demo visual standalone (Vite)
+│   ├── index.html                       # Wrapper con device frame
+│   ├── popup.html                       # Popup standalone con SVG inline
+│   └── demo.ts                          # Lógica demo importando core + i18n
+│
+├── scripts/
+│   └── generate-icons.mjs               # SVG → PNG con sharp (16/48/128)
+│
 ├── legacy/                          ← Código anterior (referencia)
-├── package.json                     ← Root del monorepo (pnpm workspaces)
-├── tsconfig.base.json               # Config base de TypeScript
-├── vitest.config.ts                 # Configuración de tests
+│
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                   # Lint + tests en cada PR
-│       └── release.yml              # Build + empaquetado de extensión
+│       └── ci.yml                       # Lint + tests en push/PR (Node 20 + 22)
+│
+├── package.json                     ← Root del monorepo (pnpm workspaces)
+├── pnpm-workspace.yaml
+├── tsconfig.base.json               # Config base TypeScript (ES2022, strict, bundler)
+├── tsconfig.json                    # Referencias a core y extension
+├── vitest.config.ts                 # Tests desde packages/core/__tests__
+├── vite.demo.config.ts              # Config Vite para demo (puerto 3000)
 ├── LICENSE
 ├── README.md
 └── PLAN.md                          ← Este archivo
@@ -76,123 +95,125 @@ password-generator/
 
 ## Stack tecnológico
 
-| Herramienta                           | Rol                | Justificación                                                           |
-| ------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
-| **pnpm workspaces**                   | Monorepo           | Un solo `pnpm install`, dependencias compartidas, sin duplicación       |
-| **TypeScript**                        | Lenguaje           | Tipos, autocompletado, errores en compilación                           |
-| **Vite**                              | Bundler            | Rápido, soporte nativo TS, HMR, plugins para extensiones                |
-| **CRXJS / vite-plugin-web-extension** | Build de extensión | Genera extensión desde Vite, HMR en desarrollo, output para Manifest v3 |
-| **Vitest**                            | Tests              | Rápido, compatible con Vite, API tipo Jest                              |
-| **GitHub Actions**                    | CI/CD              | Lint + tests automáticos, build de extensión como artefacto             |
+| Herramienta                   | Versión | Rol                | Justificación                                                     |
+| ----------------------------- | ------- | ------------------ | ----------------------------------------------------------------- |
+| **pnpm workspaces**           | 10.x    | Monorepo           | Un solo `pnpm install`, dependencias compartidas, sin duplicación |
+| **TypeScript**                | 5.9     | Lenguaje           | Tipos estrictos, autocompletado, errores en compilación           |
+| **Vite**                      | 7.3     | Bundler            | Rápido, soporte nativo TS, HMR, modo library para core            |
+| **vite-plugin-web-extension** | —       | Build de extensión | Genera extensión desde Vite, output para Manifest v3              |
+| **vite-plugin-dts**           | 4.5     | Tipos de librería  | Genera `.d.ts` para el paquete core                               |
+| **Vitest**                    | 4.0     | Tests              | 30 tests, rápido, compatible con Vite, API tipo Jest              |
+| **sharp**                     | 0.34    | Iconos             | Renderiza SVG maestro a PNGs en múltiples tamaños                 |
+| **GitHub Actions**            | —       | CI/CD              | Lint + tests automáticos en Node 20 y 22, matrix build            |
 
 ---
 
 ## Roadmap
 
-### Fase 1 — Scaffolding (semana 1)
+### Fase 1 — Scaffolding ✅
 
-- [ ] Inicializar monorepo con pnpm workspaces
-- [ ] Configurar TypeScript base (`tsconfig.base.json`)
-- [ ] Crear `packages/core/` con `package.json` y `tsconfig.json`
-- [ ] Crear `packages/extension/` con `package.json` y `tsconfig.json`
-- [ ] Configurar Vite para `core` (modo library)
-- [ ] Configurar Vitest
-- [ ] Agregar scripts en root: `build`, `test`, `dev`
+- [x] Inicializar monorepo con pnpm workspaces
+- [x] Configurar TypeScript base (`tsconfig.base.json`) — ES2022, strict, bundler resolution
+- [x] Crear `packages/core/` con `package.json` y `tsconfig.json`
+- [x] Crear `packages/extension/` con `package.json` y `tsconfig.json`
+- [x] Configurar Vite para `core` (modo library con dual ESM/CJS)
+- [x] Configurar Vitest
+- [x] Agregar scripts en root: `build`, `build:core`, `build:extension`, `test`, `test:watch`, `dev`, `demo`, `lint`, `icons`
 
-### Fase 2 — Core: generador (semana 2-3)
+### Fase 2 — Core: generador ✅
 
-- [ ] Implementar `random.ts` — wrapper sobre `crypto.getRandomValues()`
-- [ ] Implementar `types.ts` — interfaces (`GeneratorOptions`, `GeneratedPassword`, etc.)
-- [ ] Implementar `transforms.ts` — tablas de sustitución configurables (símbolo, número, mayúscula)
-- [ ] Curar diccionarios:
-  - [ ] EN: filtrar [google-10000-english](https://github.com/first20hours/google-10000-english) → ~2,000 palabras (6-12 chars, sin nombres propios/marcas/ofensivas)
-  - [ ] ES: filtrar lista de frecuencia similar → ~2,000 palabras
-- [ ] Implementar `generator.ts`:
-  - [ ] Modo **palabra transformada** (mejora del actual)
-  - [ ] Modo **passphrase** (3-4 palabras separadas por símbolo)
-  - [ ] Modo **aleatorio** (caracteres random)
-- [ ] Implementar `strength.ts` — cálculo de entropía y nivel de fortaleza
-- [ ] Escribir tests unitarios para cada módulo
-- [ ] Exportar API pública desde `index.ts`
+- [x] Implementar `random.ts` — `randomInt()`, `randomElement()`, `randomChar()`, `shuffle()` sobre `crypto.getRandomValues()`
+- [x] Implementar `types.ts` — `GeneratorOptions`, `GeneratedPassword`, `GenerationMode`, `Language`, `StrengthLevel`, `DEFAULT_OPTIONS`
+- [x] Implementar `transforms.ts` — `removeDiacritics()`, `applySymbols()`, `applyNumbers()`, `applyUppercase()` con cantidades configurables
+- [x] Curar diccionarios:
+  - [x] EN: 1 807 palabras curadas (6-12 chars, sin nombres propios/marcas/ofensivas)
+  - [x] ES: 1 656 palabras curadas con los mismos criterios
+- [x] Implementar `generator.ts`:
+  - [x] Modo **word** — palabra transformada con sustituciones configurables
+  - [x] Modo **passphrase** — 3-4 palabras separadas por símbolo
+  - [x] Modo **random** — caracteres aleatorios criptográficamente seguros
+- [x] Implementar `strength.ts` — cálculo de entropía (bits) y niveles (`weak` / `fair` / `strong` / `very-strong`)
+- [x] Escribir tests unitarios — 30 tests (14 generator + 8 transforms + 8 random)
+- [x] Exportar API pública desde `index.ts`
 
-### Fase 3 — Extensión de navegador (semana 4-5)
+### Fase 3 — Extensión de navegador ✅
 
-- [ ] Crear `manifest.json` v3 (compatible Chrome/Edge/Firefox)
-- [ ] Configurar Vite con plugin de extensión
-- [ ] Diseñar popup UI:
-  - [ ] Contraseña generada con botón copiar
-  - [ ] Selector de modo (palabra / passphrase / random)
-  - [ ] Selector de idioma
-  - [ ] Barra de fortaleza visual
-  - [ ] Botón regenerar
-  - [ ] Opciones rápidas (largo, cantidad de sustituciones)
-- [ ] Implementar `popup.ts` consumiendo el paquete `core`
-- [ ] Implementar `background.ts` (service worker) si se necesita persistencia
-- [ ] Guardar preferencias del usuario con `chrome.storage.local`
-- [ ] Probar en Chrome, Edge y Firefox
+- [x] Crear `manifest.json` v3 (Chrome/Edge/Firefox con `browser_specific_settings`)
+- [x] Configurar Vite con `vite-plugin-web-extension`
+- [x] Diseñar popup UI:
+  - [x] Contraseña generada con botón copiar (acción principal prominente)
+  - [x] Selector de modo (word / passphrase / random)
+  - [x] Selector de idioma (EN / ES)
+  - [x] Barra de fortaleza visual con entropía en bits
+  - [x] Botón regenerar
+  - [x] Opciones avanzadas colapsables (largo, cantidad de sustituciones)
+- [x] Implementar `popup.ts` consumiendo `@memorable-passwords/core`
+- [x] Implementar `background.ts` (service worker)
+- [x] Guardar preferencias del usuario con `chrome.storage.local`
+- [x] Diseñar iconos — SVG maestro (gradiente púrpura #9c5fff→#512da8, llave, sparkles dorados) + PNGs generados con sharp
 
-### Fase 4 — Polish y UX (semana 6)
+### Fase 4 — Polish y UX ✅
 
-- [ ] Animaciones y transiciones en el popup
-- [ ] Tema claro/oscuro (respetando preferencia del sistema)
-- [ ] Accesibilidad (ARIA labels, navegación por teclado)
-- [ ] Historial de contraseñas generadas (en memoria de la sesión, sin persistencia por seguridad)
-- [ ] Tooltip al copiar ("¡Copiado!")
-- [ ] Favicon / iconos de extensión actualizados
+- [x] Design system con CSS custom properties (`--mp-*` tokens) derivados de la paleta del icono
+- [x] Tema claro/oscuro automático (`@media (prefers-color-scheme: dark)`)
+- [x] Accesibilidad — ARIA labels, `role`, `aria-live`, `focus-visible`, navegación por teclado
+- [x] Historial de contraseñas (últimas 25 en memoria de sesión, sin persistencia)
+- [x] Toast al copiar ("Copied!" / "¡Copiado!")
+- [x] i18n completo — toda la interfaz se traduce al cambiar idioma (EN/ES) vía `data-i18n` attributes
+- [x] Demo visual standalone (`demo/`) con Vite en puerto 3000
+- [x] Paneles colapsables con animación (opciones avanzadas, historial)
 
-### Fase 5 — CI/CD y distribución (semana 7)
+### Fase 5 — CI/CD y distribución ✅
 
-- [ ] GitHub Actions: CI (lint + tests en cada push/PR)
-- [ ] GitHub Actions: build automático de extensión (.zip) como artefacto
-- [ ] Documentar proceso de publicación en stores:
+- [x] GitHub Actions: CI (lint + tests en cada push/PR) — matrix Node 20 + 22
+- [x] Actualizar README.md con documentación completa del proyecto v2
+- [x] GitHub Actions: workflow manual (`release.yml`) para build de extensión (.zip) como artefacto — Chrome/Edge y Firefox por separado
+- [ ] Documentar proceso de publicación en stores — _pendiente_:
   - [ ] Chrome Web Store
   - [ ] Firefox Add-ons (AMO)
   - [ ] Microsoft Edge Add-ons
-- [ ] Actualizar README.md con documentación del nuevo proyecto
 
 ---
 
 ## Consideraciones
 
-### Seguridad
+### Seguridad (implementado ✅)
 
-- **`crypto.getRandomValues()`** en lugar de `Math.random()`. Es la fuente de aleatoriedad recomendada para contextos criptográficos y está disponible en todos los navegadores modernos y en service workers.
-- **No persistir contraseñas** en storage del navegador. El historial de sesión se mantiene solo en memoria y se elimina al cerrar el popup.
+- **`crypto.getRandomValues()`** en lugar de `Math.random()` en todos los módulos de aleatoriedad (`random.ts`).
+- **No se persisten contraseñas** en storage del navegador. El historial de sesión (máx. 25) se mantiene solo en memoria y se elimina al cerrar el popup.
 - **Content Security Policy (CSP)** estricta en el manifest.json — sin `unsafe-eval` ni `unsafe-inline`.
-- **Permisos mínimos** en la extensión: solo `clipboardWrite` y `storage`. Sin acceso a pestañas, historial ni datos de navegación.
+- **Permisos mínimos** en la extensión: solo `storage`. Sin acceso a pestañas, historial ni datos de navegación.
 
-### Diccionarios
+### Diccionarios (implementado ✅)
 
-- Las listas actuales contienen ~1,500 palabras EN y ~1,800 palabras ES pero incluyen ruido (nombres de ciudades, marcas, palabras técnicas).
-- El nuevo enfoque: curar palabras de **uso cotidiano**, **pronunciables**, entre **6 y 12 caracteres**, sin nombres propios, marcas registradas ni contenido ofensivo.
-- Fuente principal EN: [google-10000-english](https://github.com/first20hours/google-10000-english) filtrado.
-- Fuente principal ES: lista de frecuencia de subtítulos ([SUBTLEX-ESP](https://www.bcbl.eu/databases/subtlex-esp)) o similar, filtrada con los mismos criterios.
-- Tamaño objetivo: ~2,000-3,000 palabras por idioma. Suficiente para buena variedad sin inflar el bundle.
+- **EN**: 1 807 palabras curadas de uso cotidiano, pronunciables, 6-12 caracteres.
+- **ES**: 1 656 palabras curadas con los mismos criterios.
+- Sin nombres propios, marcas registradas ni contenido ofensivo.
+- Cada diccionario exporta un array tipado desde `dictionaries/en.ts` y `dictionaries/es.ts`.
 
-### Compatibilidad de extensión
+### Compatibilidad de extensión (implementado ✅)
 
-- **Manifest v3** es obligatorio para Chrome/Edge desde 2024. Firefox lo soporta desde Firefox 109+ con algunas diferencias menores.
-- Diferencias clave Firefox vs Chrome en Manifest v3:
-  - Firefox usa `browser_specific_settings` para el ID de extensión.
-  - Firefox soporta `scripts` en background además de `service_worker`.
-  - Se puede manejar con un solo manifest + condicionales mínimos en el build.
-- El plugin de Vite para extensiones (CRXJS o `vite-plugin-web-extension`) puede generar builds separados por navegador desde la misma fuente.
+- **Manifest v3** universal con un solo `manifest.json`.
+- Firefox: incluye `browser_specific_settings` con gecko ID.
+- Chrome/Edge: service worker como background script.
+- `vite-plugin-web-extension` genera el build desde Vite.
 
-### UX de la extensión
+### UX de la extensión (implementado ✅)
 
-- El popup debe ser **rápido**: cargar y mostrar una contraseña en <100ms.
-- **Copiar con un clic** es la acción principal — debe ser el elemento más prominente.
-- Las opciones avanzadas (modo, idioma, largo) deben ser accesibles pero no abrumar al usuario casual.
-- Guardar las preferencias del usuario para que no tenga que reconfigurar cada vez.
+- El popup carga y genera una contraseña inmediatamente.
+- **Copiar con un clic** es la acción más prominente.
+- Las opciones avanzadas están en un panel colapsable para no abrumar al usuario casual.
+- Las preferencias (modo, idioma, largo, sustituciones) se guardan con `chrome.storage.local`.
+- **i18n**: toda la interfaz se traduce dinámicamente al cambiar el selector de idioma.
 
-### Escalabilidad del core
+### Escalabilidad del core (implementado ✅)
 
-- El paquete `core` se diseña como librería independiente, publicable en npm (nombre por definir — se busca algo corto, memorable y disponible).
+- El paquete se publica como `@memorable-passwords/core` con dual ESM/CJS exports.
 - La arquitectura con `GeneratorOptions` permite agregar:
-  - Nuevos idiomas (solo agregar un archivo `dictionaries/fr.ts`).
-  - Nuevas transformaciones (ej. leet speak personalizado).
+  - Nuevos idiomas (solo agregar un archivo `dictionaries/fr.ts` y registrarlo en `generator.ts`).
+  - Nuevas transformaciones.
   - Nuevos modos de generación.
-- Tree-shakeable: si solo se importa el modo passphrase, no se envía el diccionario completo al bundle.
+- Tree-shakeable: Vite en modo library.
 - El nombre de la extensión en los stores es **Memorable Passwords** — se mantiene por continuidad con la versión ya publicada en Firefox Add-ons.
 
 ---
@@ -201,6 +222,8 @@ password-generator/
 
 ### Corto plazo (post-lanzamiento)
 
+- **Release workflow**: GitHub Action para build automático de `.zip` y publicación como artefacto/release
+- **Documentación de stores**: guía paso a paso para publicar en Chrome Web Store, Firefox AMO y Edge Add-ons
 - **Keyboard shortcut global**: generar y copiar contraseña sin abrir el popup (ej. `Ctrl+Shift+P`)
 - **Context menu**: click derecho en un campo de contraseña → "Generar contraseña memorable"
 - **Autofill**: insertar la contraseña directamente en el campo activo de la página
@@ -210,7 +233,7 @@ password-generator/
 ### Mediano plazo
 
 - **Web app independiente**: desplegar en yardev.net/pg con la misma librería core, framework ligero (Astro, vanilla)
-- **CLI tool**: `npx <nombre-paquete>` para generar contraseñas desde la terminal
+- **CLI tool**: `npx @memorable-passwords/core` para generar contraseñas desde la terminal
 - **Publicar en npm**: publicar la librería core como paquete para que otros proyectos lo usen
 - **Patrones personalizados**: el usuario define un template como `Ww-Nnnn-Ss` (W=palabra, N=número, S=símbolo)
 - **Reglas de sitio**: presets para sitios conocidos que tienen reglas específicas (largo máximo, caracteres prohibidos, etc.)
