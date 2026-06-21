@@ -169,8 +169,8 @@ interface GeneratedPassword {
 
 | Technology      | Purpose                                        |
 | --------------- | ---------------------------------------------- |
-| TypeScript 5.9  | Type-safe source code                          |
-| Vite 7          | Bundling (library mode + web extension plugin) |
+| TypeScript 6    | Type-safe source code                          |
+| Vite 8          | Bundling (library mode + web extension plugin) |
 | Vitest 4        | Unit testing (30 tests)                        |
 | pnpm workspaces | Monorepo management                            |
 | Manifest v3     | Cross-browser extension standard               |
